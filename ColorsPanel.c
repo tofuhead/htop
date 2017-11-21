@@ -44,6 +44,7 @@ static const char* ColorSchemeNames[] = {
    "MC",
    "Black Night",
    "Broken Gray",
+   "Orange Is New Gray",
    NULL
 };
 
@@ -56,7 +57,7 @@ static void ColorsPanel_delete(Object* object) {
 
 static HandlerResult ColorsPanel_eventHandler(Panel* super, int ch) {
    ColorsPanel* this = (ColorsPanel*) super;
-   
+
    HandlerResult result = IGNORED;
    int mark = Panel_getSelectedIndex(super);
 
@@ -80,8 +81,19 @@ static HandlerResult ColorsPanel_eventHandler(Panel* super, int ch) {
       CRT_setColors(mark);
       Panel* menu = (Panel*) Vector_get(this->scr->panels, 0);
       Header_draw(header);
-      RichString_setAttr(&(super->header), CRT_colors[PANEL_HEADER_FOCUS]);
-      RichString_setAttr(&(menu->header), CRT_colors[PANEL_HEADER_UNFOCUS]);
+
+      init_pair(2, 12, COLOR_BLACK);
+      attrset(COLOR_PAIR(2));
+      attron(COLOR_PAIR(2));
+
+      // RichString_setAttr(&(super->header), CRT_colors[PANEL_HEADER_FOCUS]);
+      RichString_setAttr(&(super->header), COLOR_PAIR(2));
+
+      init_pair(3, 15, COLOR_BLACK);
+      attrset(COLOR_PAIR(3));
+      attron(COLOR_PAIR(3));
+
+      RichString_setAttr(&(menu->header), COLOR_PAIR(3));
       ScreenManager_resize(this->scr, this->scr->x1, header->height, this->scr->x2, this->scr->y2);
    }
    return result;

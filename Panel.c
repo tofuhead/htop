@@ -124,7 +124,8 @@ void Panel_init(Panel* this, int x, int y, int w, int h, ObjectClass* type, bool
    RichString_beginAllocated(this->header);
    this->defaultBar = fuBar;
    this->currentBar = fuBar;
-   this->selectionColor = CRT_colors[PANEL_SELECTION_FOCUS];
+  //  this->selectionColor = COLOR_PAIR(CRT_colors[PANEL_SELECTION_FOCUS]);'
+  this->selectionColor = COLOR_PAIR(83);
 }
 
 void Panel_done(Panel* this) {
@@ -280,7 +281,13 @@ void Panel_draw(Panel* this, bool focus) {
       int attr = focus
                ? CRT_colors[PANEL_HEADER_FOCUS]
                : CRT_colors[PANEL_HEADER_UNFOCUS];
-      attrset(attr);
+
+     // HACK: basse
+     init_pair(5, 12, 235);
+     attrset(COLOR_PAIR(5));
+     attron(COLOR_PAIR(5));
+
+      // attrset(attr);
       mvhline(y, x, ' ', this->w);
       if (scrollH < headerLen) {
          RichString_printoffnVal(this->header, y, x, scrollH,
@@ -313,6 +320,10 @@ void Panel_draw(Panel* this, bool focus) {
    int selectionColor = focus
                  ? this->selectionColor
                  : CRT_colors[PANEL_SELECTION_UNFOCUS];
+   // HACK: basse
+   init_pair(2, 12, 235);
+   attrset(COLOR_PAIR(2));
+   attron(COLOR_PAIR(2));
 
    if (this->needsRedraw) {
       int line = 0;
@@ -325,8 +336,10 @@ void Panel_draw(Panel* this, bool focus) {
          int amt = MIN(itemLen - scrollH, this->w);
          bool selected = (i == this->selected);
          if (selected) {
-            attrset(selectionColor);
-            RichString_setAttr(&item, selectionColor);
+            init_pair(2, 13, COLOR_BLACK);
+            attrset(COLOR_PAIR(2));
+            attron(COLOR_PAIR(2));
+            RichString_setAttr(&item, COLOR_PAIR(1));
          }
          mvhline(y + line, x, ' ', this->w);
          if (amt > 0)
@@ -356,7 +369,9 @@ void Panel_draw(Panel* this, bool focus) {
       if (scrollH < oldLen)
          RichString_printoffnVal(old, y+this->oldSelected - first, x,
             scrollH, MIN(oldLen - scrollH, this->w));
-      attrset(selectionColor);
+      attrset(COLOR_PAIR(2));
+      attron(COLOR_PAIR(2));
+      // attrset(selectionColor);
       mvhline(y+this->selected - first, x+0, ' ', this->w);
       RichString_setAttr(&new, selectionColor);
       if (scrollH < newLen)
@@ -372,7 +387,7 @@ void Panel_draw(Panel* this, bool focus) {
 
 bool Panel_onKey(Panel* this, int key) {
    assert (this != NULL);
-   
+
    int size = Vector_size(this->items);
    switch (key) {
    case KEY_DOWN:
@@ -444,7 +459,7 @@ bool Panel_onKey(Panel* this, int key) {
    if (this->selected < 0 || size == 0) {
       this->selected = 0;
       this->needsRedraw = true;
-   } else if (this->selected >= size) {   
+   } else if (this->selected >= size) {
       this->selected = size - 1;
       this->needsRedraw = true;
    }

@@ -20,7 +20,9 @@ in the source distribution for its full text.
 
 #define ColorPair(i,j) COLOR_PAIR((7-i)*8+j)
 
+
 #define Black COLOR_BLACK
+#define Orange 188
 #define Red COLOR_RED
 #define Green COLOR_GREEN
 #define Yellow COLOR_YELLOW
@@ -57,7 +59,8 @@ typedef enum ColorSchemes_ {
    COLORSCHEME_MIDNIGHT = 4,
    COLORSCHEME_BLACKNIGHT = 5,
    COLORSCHEME_BROKENGRAY = 6,
-   LAST_COLORSCHEME = 7,
+   COLORSCHEME_ORANGEISNEWGRAY = 7,
+   LAST_COLORSCHEME = 8,
 } ColorSchemes;
 
 typedef enum ColorElements_ {
@@ -171,7 +174,7 @@ int CRT_colorSchemes[LAST_COLORSCHEME][LAST_COLORELEMENT] = {
       [FUNCTION_KEY] = ColorPair(White,Black),
       [PANEL_HEADER_FOCUS] = ColorPair(Black,Green),
       [PANEL_HEADER_UNFOCUS] = ColorPair(Black,Green),
-      [PANEL_SELECTION_FOCUS] = ColorPair(Black,Cyan),
+      [PANEL_SELECTION_FOCUS] = ColorPair(13, 0),
       [PANEL_SELECTION_FOLLOW] = ColorPair(Black,Yellow),
       [PANEL_SELECTION_UNFOCUS] = ColorPair(Black,White),
       [FAILED_SEARCH] = ColorPair(Red,Cyan),
@@ -518,7 +521,66 @@ int CRT_colorSchemes[LAST_COLORSCHEME][LAST_COLORELEMENT] = {
       [CPU_STEAL] = ColorPair(Cyan,Black),
       [CPU_GUEST] = ColorPair(Cyan,Black),
    },
-   [COLORSCHEME_BROKENGRAY] = { 0 } // dynamically generated.
+   [COLORSCHEME_BROKENGRAY] = { 0 }, // dynamically generated.
+   [COLORSCHEME_ORANGEISNEWGRAY] = {
+      [RESET_COLOR] = ColorPair(White,Black),
+      [DEFAULT_COLOR] = 183,
+      [FUNCTION_BAR] = ColorPair(Black,Cyan),
+      [FUNCTION_KEY] = ColorPair(White,Black),
+      [PANEL_HEADER_FOCUS] = ColorPair(Black, Yellow),
+      [PANEL_HEADER_UNFOCUS] = ColorPair(Black,Green),
+      [PANEL_SELECTION_FOCUS] = ColorPair(Green,Black),
+      [PANEL_SELECTION_FOLLOW] = ColorPair(Black,Yellow),
+      [PANEL_SELECTION_UNFOCUS] = ColorPair(Black,Green),
+      [FAILED_SEARCH] = ColorPair(Red,Cyan),
+      [UPTIME] = A_BOLD | ColorPair(Cyan,Black),
+      [BATTERY] = A_BOLD | ColorPair(Cyan,Black),
+      [LARGE_NUMBER] = A_BOLD | ColorPair(Red,Black),
+      [METER_TEXT] = ColorPair(Cyan,Black),
+      [METER_VALUE] = A_BOLD | ColorPair(Cyan,Black),
+      [LED_COLOR] = ColorPair(Green,Black),
+      [TASKS_RUNNING] = A_BOLD | ColorPair(Green,Black),
+      [PROCESS] = A_NORMAL,
+      [PROCESS_SHADOW] = A_BOLD | ColorPair(Black,Black),
+      [PROCESS_TAG] = A_BOLD | ColorPair(Yellow,Black),
+      [PROCESS_MEGABYTES] = ColorPair(Cyan,Black),
+      [PROCESS_BASENAME] = A_BOLD | ColorPair(Cyan,Black),
+      [PROCESS_TREE] = ColorPair(Cyan,Black),
+      [PROCESS_R_STATE] = ColorPair(Green,Black),
+      [PROCESS_D_STATE] = A_BOLD | ColorPair(Red,Black),
+      [PROCESS_HIGH_PRIORITY] = ColorPair(Red,Black),
+      [PROCESS_LOW_PRIORITY] = ColorPair(Green,Black),
+      [PROCESS_THREAD] = ColorPair(Green,Black),
+      [PROCESS_THREAD_BASENAME] = A_BOLD | ColorPair(Green,Black),
+      [BAR_BORDER] = A_BOLD,
+      [BAR_SHADOW] = A_BOLD | ColorPair(Black,Black),
+      [SWAP] = ColorPair(Red,Black),
+      [GRAPH_1] = A_BOLD | ColorPair(Cyan,Black),
+      [GRAPH_2] = ColorPair(Cyan,Black),
+      [MEMORY_USED] = ColorPair(Green,Black),
+      [MEMORY_BUFFERS] = ColorPair(Blue,Black),
+      [MEMORY_BUFFERS_TEXT] = A_BOLD | ColorPair(Blue,Black),
+      [MEMORY_CACHE] = ColorPair(Yellow,Black),
+      [LOAD_AVERAGE_FIFTEEN] = ColorPair(Cyan,Black),
+      [LOAD_AVERAGE_FIVE] = A_BOLD | ColorPair(Cyan,Black),
+      [LOAD_AVERAGE_ONE] = A_BOLD | ColorPair(White,Black),
+      [LOAD] = A_BOLD,
+      [HELP_BOLD] = A_BOLD | ColorPair(Cyan,Black),
+      [CLOCK] = A_BOLD,
+      [CHECK_BOX] = ColorPair(Cyan,Black),
+      [CHECK_MARK] = A_BOLD,
+      [CHECK_TEXT] = A_NORMAL,
+      [HOSTNAME] = A_BOLD,
+      [CPU_NICE] = ColorPair(Blue,Black),
+      [CPU_NICE_TEXT] = A_BOLD | ColorPair(Blue,Black),
+      [CPU_NORMAL] = ColorPair(Green,Black),
+      [CPU_KERNEL] = ColorPair(Red,Black),
+      [CPU_IOWAIT] = A_BOLD | ColorPair(Black, Black),
+      [CPU_IRQ] = ColorPair(Yellow,Black),
+      [CPU_SOFTIRQ] = ColorPair(Magenta,Black),
+      [CPU_STEAL] = ColorPair(Cyan,Black),
+      [CPU_GUEST] = ColorPair(Cyan,Black),
+   }
 };
 
 int CRT_cursorX = 0;
@@ -545,6 +607,7 @@ static void CRT_handleSIGTERM(int sgn) {
 
 void CRT_init(int delay, int colorScheme) {
    initscr();
+
    noecho();
    CRT_delay = delay;
    if (CRT_delay == 0) {
@@ -552,12 +615,12 @@ void CRT_init(int delay, int colorScheme) {
    }
    CRT_colors = CRT_colorSchemes[colorScheme];
    CRT_colorScheme = colorScheme;
-   
+
    for (int i = 0; i < LAST_COLORELEMENT; i++) {
       unsigned int color = CRT_colorSchemes[COLORSCHEME_DEFAULT][i];
       CRT_colorSchemes[COLORSCHEME_BROKENGRAY][i] = color == (A_BOLD | ColorPair(Black,Black)) ? ColorPair(White,Black) : color;
    }
-   
+
    halfdelay(CRT_delay);
    nonl();
    intrflush(stdscr, false);
@@ -575,7 +638,7 @@ void CRT_init(int delay, int colorScheme) {
       CRT_scrollHAmount = 20;
    else
       CRT_scrollHAmount = 5;
-   if (String_eq(CRT_termType, "xterm") || String_eq(CRT_termType, "xterm-color") || String_eq(CRT_termType, "vt220")) {
+   if (String_eq(CRT_termType, "xterm") || String_eq(CRT_termType, "xterm-color") || String_eq(CRT_termType, "xterm-color") || String_eq(CRT_termType, "vt220")) {
       define_key("\033[H", KEY_HOME);
       define_key("\033[F", KEY_END);
       define_key("\033[7~", KEY_HOME);
@@ -595,6 +658,8 @@ void CRT_init(int delay, int colorScheme) {
          define_key(sequence, KEY_ALT('A' + (c - 'a')));
       }
    }
+
+
 #ifndef DEBUG
    signal(11, CRT_handleSIGSEGV);
 #endif
@@ -628,6 +693,7 @@ void CRT_init(int delay, int colorScheme) {
 
 }
 
+
 void CRT_done() {
    curs_set(1);
    endwin();
@@ -649,6 +715,8 @@ int CRT_readKey() {
    return ret;
 }
 
+
+
 void CRT_disableDelay() {
    nocbreak();
    cbreak();
@@ -666,7 +734,7 @@ void CRT_setColors(int colorScheme) {
          for (int j = 0; j < 8; j++)
             init_pair((7-i)*8+j, i, j);
    } else {
-      for (int i = 0; i < 8; i++) 
+      for (int i = 0; i < 8; i++)
          for (int j = 0; j < 8; j++)
             init_pair((7-i)*8+j, i, (j==0?-1:j));
    }

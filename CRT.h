@@ -12,6 +12,7 @@ in the source distribution for its full text.
 #define ColorPair(i,j) COLOR_PAIR((7-i)*8+j)
 
 #define Black COLOR_BLACK
+#define Orange 188
 #define Red COLOR_RED
 #define Green COLOR_GREEN
 #define Yellow COLOR_YELLOW
@@ -47,7 +48,8 @@ typedef enum ColorSchemes_ {
    COLORSCHEME_MIDNIGHT = 4,
    COLORSCHEME_BLACKNIGHT = 5,
    COLORSCHEME_BROKENGRAY = 6,
-   LAST_COLORSCHEME = 7,
+   COLORSCHEME_ORANGEISNEWGRAY = 7,
+   LAST_COLORSCHEME = 8,
 } ColorSchemes;
 
 typedef enum ColorElements_ {

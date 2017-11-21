@@ -29,5 +29,4 @@ const char* ListItem_getRef(ListItem* this);
 
 long ListItem_compare(const void* cast1, const void* cast2);
 
-
 #endif
